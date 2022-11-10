@@ -68,4 +68,18 @@ public class RegisterTests
         register.ShoppingCart.TotalAmount.Should().Be(4);
         register.ShoppingCart.TotalPrice.Should().Be(20.99M * 4);
     }
+
+    [Fact]
+    public void Must_accept_correct_pay()
+    {
+        register.Execute("cat pepsimax 20.99 150");
+        register.Execute("buy pepsimax");
+
+        outputBuffer.Clear();
+        register.Execute("pay 30");
+
+        register.ShoppingCart.TotalPrice.Should().Be(0);
+        outputBuffer.Should().Contain("  Amount paid: 30.00");
+        outputBuffer.Should().Contain("  Cash back: 9.01");
+    }
 }

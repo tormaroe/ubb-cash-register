@@ -20,6 +20,9 @@ public class Register
         Output("  Catalogue product:  cat <name> <price> <stock amount>");
         Output("  List products:      list");
         Output("  Buy product:        buy <name> {optional amount}");
+        Output("  Checkout:           pay <amount>");
+        Output("  Load file:          load <filename>");
+        Output("  Save state          save <filename>");
         Output("  Print menu:         menu");
         Output("  Quit:               quit");
         Output(string.Empty);
@@ -36,35 +39,80 @@ public class Register
             {
                 return result;
             }
-            else if (arguments[0] == "cat")
+
+            switch (arguments[0])
             {
-                var item = catalogue.Add(new CatalogueItem(
-                    Name: arguments[1],
-                    Price: decimal.Parse(arguments[2]),
-                    Amount: int.Parse(arguments[3])
-                ));
-                Output($"{item.Name} added to catalogue");
-            }
-            else if (arguments[0] == "list")
-            {
-                Output(string.Empty);
-                Output($" ------ PRODUCT CATALOGUE ----------------------------------------------------------------------");
-                foreach (var item in catalogue.Items)
-                {
-                    Output($"  - {item.Name,-24} {FormatMoney(item.Price),10} {item.Amount,10}");
-                }
-            }
-            else if (arguments[0] == "buy")
-            {
-                Buy(arguments.Skip(1).ToList());
-            }
-            else if (arguments[0] == "menu")
-            {
-                PrintMenu();
-            }
-            else if (arguments[0] == "quit")
-            {
-                result.IsQuit = true;
+                case "cat":
+                    {
+                        var item = catalogue.Add(new CatalogueItem(
+                            Name: arguments[1],
+                            Price: decimal.Parse(arguments[2]),
+                            Amount: int.Parse(arguments[3])
+                        ));
+                        Output($"{item.Name} added to catalogue");
+                        break;
+                    }
+
+                case "list":
+                    {
+                        Output(string.Empty);
+                        Output($" ------ PRODUCT CATALOGUE ----------------------------------------------------------------------");
+                        foreach (var item in catalogue.Items)
+                        {
+                            Output($"  - {item.Name,-24} {FormatMoney(item.Price),10} {item.Amount,10}");
+                        }
+
+                        break;
+                    }
+
+                case "buy":
+                    Buy(arguments.Skip(1).ToList());
+                    break;
+                case "pay":
+                    {
+                        var paid = decimal.Parse(arguments[1]);
+                        Output($"  Amount paid: {FormatMoney(paid)}");
+
+                        var rest = paid - cart.TotalPrice;
+
+                        if (rest < 0m)
+                        {
+                            throw new ArgumentException("Not enough");
+                        }
+                        else
+                        {
+                            Output($"  Cash back: {FormatMoney(rest)}");
+                        }
+
+                        cart = new();
+                        break;
+                    }
+
+                case "load":
+                    {
+                        var filename = arguments[1];
+                        Output($"Reading {filename} ...");
+                        var lines = File.ReadAllLines(filename);
+                        Array.ForEach(lines, l => Execute(l));
+                        break;
+                    }
+
+                case "save":
+                    {
+                        var filename = arguments[1];
+                        List<string> instructions = new();
+                        instructions.AddRange(catalogue.Items.Select(x => x.ToInstruction()));
+                        File.WriteAllLines(filename, instructions);
+                        Output($"State saved to {filename}");
+                        break;
+                    }
+
+                case "menu":
+                    PrintMenu();
+                    break;
+                case "quit":
+                    result.IsQuit = true;
+                    break;
             }
 
         }

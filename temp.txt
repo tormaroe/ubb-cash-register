@@ -1,0 +1,2 @@
+cat pizza 56.5 100
+cat pepsi 22 1000
