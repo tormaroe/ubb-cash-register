@@ -1,7 +1,9 @@
 ﻿using Bouvet.CashRegister.Core;
+using Tommy;
 
 internal class Program
 {
+
     private static void Main(string[] args)
     {
 
@@ -28,10 +30,11 @@ internal class Program
                                                                                                
         ");
 
-        Register register = new();
+        var config = ReadConfig();
+        Register register = new(config.CommandsToLoad);
         register.PrintMenu();
 
-        while(true) 
+        while (true)
         {
             Console.Write(">> ");
             var userInput = Console.ReadLine();
@@ -42,6 +45,22 @@ internal class Program
             {
                 break;
             }
+        }
+    }
+
+    private class Config
+    {
+        public List<string> CommandsToLoad { get; } = new();
+    }
+
+    private static Config ReadConfig()
+    {
+        using (var reader = File.OpenText("config.toml"))
+        {
+            TomlTable table = TOML.Parse(reader);
+            var config = new Config();
+            config.CommandsToLoad.AddRange(table["commands_to_load"].AsArray.Children.Select(x => (string)x));
+            return config;
         }
     }
 }

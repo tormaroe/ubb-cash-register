@@ -4,6 +4,15 @@ namespace Bouvet.CashRegister.Core;
 
 public class Register
 {
+    private static List<ICommand> availableCommands = CommandDiscovery.FindAllCommands();
+
+    private SortedSet<ICommand> commands = new(
+        Comparer<ICommand>.Create((a, b) => a.DescriptiveName.CompareTo(b.DescriptiveName))
+    );
+
+    public void AddCommand(string name) => 
+        commands.Add(availableCommands.First(c => c.CommandName == name));
+
     internal Catalogue Catalogue { get; } = new();
     internal ShoppingCart Cart { get; set; } = new();
 
@@ -11,40 +20,34 @@ public class Register
 
     public Action<string> Output { get; init; } = Console.WriteLine;
 
-    public Register()
+    public Register(List<string> commandsToLoad)
     {
         Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("EN-US");
+
+        /*
+            Core commands are always added:
+        */
+        AddCommand("menu");
+        AddCommand("quit");
+
+        commandsToLoad.ForEach(c => AddCommand(c));
     }
 
     public void PrintMenu()
     {
         Output("----------------------------------------------------------------------------------------------------");
-        Output("  Catalogue product:  cat <name> <price> <stock amount>");
-        Output("  List products:      list");
-        Output("  Buy product:        buy <name> {optional amount}");
-        Output("  Checkout:           pay <amount>");
-        Output("  Load file:          load <filename>");
-        Output("  Save state          save <filename>");
-        Output("  Print menu:         menu");
-        Output("  Quit:               quit");
+        foreach(var c in commands)
+        {
+            Output($"  {c.DescriptiveName + ":", -19} {c.UsageExample}");
+        }
         Output(string.Empty);
     }
 
     private ICommand GetCommand(List<string>? input)
     {
-        /* Fancy new switch syntax.. */
-        return input?.First() switch
-        {
-            "cat" => new CatalogueCommand(),
-            "list" => new ListCommand(),
-            "buy" => new BuyCommand(),
-            "pay" => new PayCommand(),
-            "load" => new LoadCommand(),
-            "save" => new SaveCommand(),
-            "menu" => new PrintMenuCommand(),
-            "quit" => new QuitCommand(),
-            _ => new NoOpCommand()
-        };
+        return commands.SingleOrDefault(
+            c => c.CommandName == input?.First(), 
+            defaultValue: new NoOpCommand());
     }
 
     public CommandResult Execute(string? input)

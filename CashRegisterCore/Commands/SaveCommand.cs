@@ -1,7 +1,11 @@
 namespace Bouvet.CashRegister.Core.Commands;
 
-public class SaveCommand : ICommand
+internal class SaveCommand : ICommand
 {
+    public string DescriptiveName => "Save state";
+    public string CommandName => "save";
+    public string UsageExample => "save <filename>";
+
     public CommandResult Execute(List<string> arguments, Register register)
     {
         var filename = arguments[0];

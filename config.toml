@@ -1,0 +1,5 @@
+
+# This configuration files uses the amazing TOML format
+# See https://toml.io/
+
+commands_to_load = ["buy", "cat", "list", "load", "save", "pay"]

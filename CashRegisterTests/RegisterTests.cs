@@ -12,11 +12,10 @@ public class RegisterTests
 
     public RegisterTests()
     {
-        register = new Register()
+        register = new Register(new List<string>{ "buy", "cat", "list", "load", "save", "pay" })
         {
             Output = outputBuffer.Add
         };
-
     }
 
     [Fact]

@@ -1,7 +1,11 @@
-namespace Bouvet.CashRegister.Core;
+namespace Bouvet.CashRegister.Core.Commands;
 
-public class LoadCommand : ICommand
+internal class LoadCommand : ICommand
 {
+    public string DescriptiveName => "Load file";
+    public string CommandName => "load";
+    public string UsageExample => "load <filename>";
+
     public CommandResult Execute(List<string> arguments, Register register)
     {
         var filename = arguments[0];

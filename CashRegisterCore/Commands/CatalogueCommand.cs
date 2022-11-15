@@ -1,7 +1,11 @@
 namespace Bouvet.CashRegister.Core.Commands;
 
-public class CatalogueCommand : ICommand
+internal class CatalogueCommand : ICommand
 {
+    public string DescriptiveName => "Catalogue product";
+    public string CommandName => "cat";
+    public string UsageExample => "cat <name> <price> <stock amount>";
+
     public CommandResult Execute(List<string> arguments, Register register)
     {
         var item = register.Catalogue.Add(new CatalogueItem(

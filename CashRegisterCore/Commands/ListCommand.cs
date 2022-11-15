@@ -1,7 +1,11 @@
 namespace Bouvet.CashRegister.Core.Commands;
 
-public class ListCommand : ICommand
+internal class ListCommand : ICommand
 {
+    public string DescriptiveName => "List products";
+    public string CommandName => "list";
+    public string UsageExample => CommandName;
+
     public CommandResult Execute(List<string> arguments, Register register)
     {
         register.Output(string.Empty);

@@ -1,7 +1,11 @@
 namespace Bouvet.CashRegister.Core.Commands;
 
-public class BuyCommand : ICommand
+internal class BuyCommand : ICommand
 {
+    public string DescriptiveName => "Buy product";
+    public string CommandName => "buy";
+    public string UsageExample => "buy <name> {optional amount}";
+
     public CommandResult Execute(List<string> arguments, Register register)
     {
         var itemName = arguments[0];

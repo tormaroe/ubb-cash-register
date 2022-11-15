@@ -7,8 +7,14 @@ namespace Bouvet.CashRegister.Core.Commands;
     or computer protocol command that does nothing.
     - wikipedia
 */
-public class NoOpCommand : ICommand
+internal class NoOpCommand : ICommand
 {
+    public string DescriptiveName => throw new NotImplementedException();
+
+    public string CommandName => throw new NotImplementedException();
+
+    public string UsageExample => throw new NotImplementedException();
+
     public CommandResult Execute(List<string> arguments, Register register)
     {
         return new CommandResult();
