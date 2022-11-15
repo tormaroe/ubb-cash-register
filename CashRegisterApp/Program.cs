@@ -31,8 +31,9 @@ internal class Program
         ");
 
         var config = ReadConfig();
-        Register register = new(config.CommandsToLoad);
-        register.PrintMenu();
+        var register = MakeRegister(config);
+
+        register.Execute("menu");
 
         while (true)
         {
@@ -48,17 +49,60 @@ internal class Program
         }
     }
 
+    private static ICommandExecutor MakeRegister(Config config)
+    {
+        var builder = new CommandExecutorBuilder()
+            .WithCommands(config.CommandsToLoad);
+        
+        if (config.IsLoggingEnabled)
+        {
+            Console.WriteLine("Input logging enabled");
+            builder.WithLogging(config.LoggingFilepath);
+        }
+        
+        if (config.IsAuthorizationEnabled)
+        {
+            Console.WriteLine("Authorization enabled");
+            builder.WithAuthorization(config.AuthorizationPassword);
+        }
+        
+        if (config.IsSupervisorNotificationEnabled)
+        {
+            Console.WriteLine("Supervisor notification enabled");
+            builder.WithSupervisorNotification(config.Supervisor);
+        }
+
+        return builder.Build();
+    }
+
     private class Config
     {
         public List<string> CommandsToLoad { get; } = new();
+        public bool IsLoggingEnabled { get; set; }
+        public string LoggingFilepath { get; set; } = "out.log";
+        public bool IsAuthorizationEnabled { get; set; }
+        public string AuthorizationPassword { get; set; } = Guid.NewGuid().ToString();
+        public bool IsSupervisorNotificationEnabled { get; set; }
+        public string Supervisor { get; set; } = "UNKNOWN";
     }
 
     private static Config ReadConfig()
     {
+        Console.WriteLine("Reading config.toml...");
         using (var reader = File.OpenText("config.toml"))
         {
             TomlTable table = TOML.Parse(reader);
             var config = new Config();
+            
+            config.IsLoggingEnabled = table["logging"]["enabled"].AsBoolean;
+            config.LoggingFilepath = table["logging"]["filepath"];
+
+            config.IsAuthorizationEnabled = table["authorization"]["enabled"].AsBoolean;
+            config.AuthorizationPassword = table["authorization"]["password"];
+
+            config.IsSupervisorNotificationEnabled = table["error_notification"]["enabled"].AsBoolean;
+            config.Supervisor = table["error_notification"]["supervisor"];
+
             config.CommandsToLoad.AddRange(table["commands_to_load"].AsArray.Children.Select(x => (string)x));
             return config;
         }

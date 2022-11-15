@@ -2,7 +2,7 @@
 
 namespace Bouvet.CashRegister.Core;
 
-public class Register
+public class Register : ICommandExecutor
 {
     private static List<ICommand> availableCommands = CommandDiscovery.FindAllCommands();
 
@@ -10,7 +10,7 @@ public class Register
         Comparer<ICommand>.Create((a, b) => a.DescriptiveName.CompareTo(b.DescriptiveName))
     );
 
-    public void AddCommand(string name) => 
+    public void AddCommand(string name) =>
         commands.Add(availableCommands.First(c => c.CommandName == name));
 
     internal Catalogue Catalogue { get; } = new();
@@ -36,9 +36,9 @@ public class Register
     public void PrintMenu()
     {
         Output("----------------------------------------------------------------------------------------------------");
-        foreach(var c in commands)
+        foreach (var c in commands)
         {
-            Output($"  {c.DescriptiveName + ":", -19} {c.UsageExample}");
+            Output($"  {c.DescriptiveName + ":",-19} {c.UsageExample}");
         }
         Output(string.Empty);
     }
@@ -46,29 +46,18 @@ public class Register
     private ICommand GetCommand(List<string>? input)
     {
         return commands.SingleOrDefault(
-            c => c.CommandName == input?.First(), 
+            c => c.CommandName == input?.First(),
             defaultValue: new NoOpCommand());
     }
 
     public CommandResult Execute(string? input)
     {
-        try
-        {
-            var arguments = ParseInput(input);
-            var command = GetCommand(arguments);
+        var arguments = ParseInput(input);
+        var command = GetCommand(arguments);
 
-            return command.Execute(
-                arguments: arguments.Skip(1).ToList(), 
-                register: this);
-
-        }
-        catch (Exception ex)
-        {
-            var result = new CommandResult();
-            result.Error(ex);
-            Output(" !!! " + result.ErrorMessage);
-            return result;
-        }
+        return command.Execute(
+            arguments: arguments.Skip(1).ToList(),
+            register: this);
     }
 
     private List<string> ParseInput(string? input)

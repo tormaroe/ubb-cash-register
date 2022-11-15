@@ -3,3 +3,15 @@
 # See https://toml.io/
 
 commands_to_load = ["buy", "cat", "list", "load", "save", "pay"]
+
+[logging]
+enabled = true
+filepath = "inputlog.txt"
+
+[authorization]
+enabled = true
+password = "impossible2guess"
+
+[error_notification]
+enabled = true
+supervisor = "Tom Holland"
